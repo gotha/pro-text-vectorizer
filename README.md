@@ -17,7 +17,7 @@ Install [libtorch](https://pytorch.org/get-started/locally/) version 2.1
 ```sh
 cd /opt
 wget https://download.pytorch.org/libtorch/cu118/libtorch-cxx11-abi-shared-with-deps-2.1.0%2Bcu118.zip
-unzip libtorch-cxx11-abi-shared-with-deps-2.3.0+cu118.zip
+unzip libtorch-cxx11-abi-shared-with-deps-2.1.0+cu118.zip
 export LIBTORCH=/opt/libtorch
 export LD_LIBRARY_PATH=${LIBTORCH}/lib:$LD_LIBRARY_PATH
 ```
