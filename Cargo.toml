@@ -4,8 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+actix-web = "4.8.0"
 anyhow = "1"
 rust-bert = "0.22.0"
+tokio = "1.39.2"
 
 [dev-dependencies]
 anyhow = "1"
