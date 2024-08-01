@@ -18,7 +18,8 @@ FROM debian:bookworm
 
 RUN apt-get update && apt-get install -y \
     ca-certificates \
-    libgomp1
+    libgomp1 \
+    curl
 
 COPY --from=builder /usr/src/app/target/release/pro-text-vectorizer /usr/local/bin/pro-text-vectorizer
 COPY --from=builder /opt/libtorch /opt/libtorch

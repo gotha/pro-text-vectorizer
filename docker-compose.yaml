@@ -1,0 +1,18 @@
+name: "pro-article-vectoriser"
+
+services:
+  app:
+    build: .
+    image: local/pro-text-vectorizer:latest
+    ports:
+      - 38080:8080
+    environment:
+      HOST: "0.0.0.0"
+      PORT: 8080
+    healthcheck:
+      test: "curl -f http://localhost:8080/ || false"
+      timeout: 5s
+      interval: 10s
+      retries: 5
+
+
