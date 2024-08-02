@@ -5,12 +5,11 @@ use std::sync::Mutex;
 use actix_web::HttpResponse;
 use actix_web::{get, post, web, App, HttpServer, Responder};
 use rust_bert::pipelines::sentence_embeddings::{
-    SentenceEmbeddingsBuilder, SentenceEmbeddingsModel, SentenceEmbeddingsModelType,
+    SentenceEmbeddingsBuilder, SentenceEmbeddingsModelType,
 };
 
-struct AppState {
-    model: Arc<Mutex<SentenceEmbeddingsModel>>,
-}
+mod logging;
+mod state;
 
 const APP_NAME: &str = "pro-text-vectorizer";
 
@@ -20,7 +19,7 @@ async fn index() -> impl Responder {
 }
 
 #[post("/predict")]
-async fn predict(data: web::Data<AppState>, req_body: String) -> impl Responder {
+async fn predict(data: web::Data<state::AppState>, req_body: String) -> impl Responder {
     let model = data.model.lock().unwrap();
     let embeddings = model.encode(&[req_body]);
     match embeddings {
@@ -39,18 +38,21 @@ async fn main() -> std::io::Result<()> {
     .await
     .expect("task failed to complete");
 
-    let app_data = web::Data::new(AppState {
-        model: Arc::new(Mutex::new(model)),
-    });
-
     let port = env::var("PORT").unwrap_or("8080".to_string());
     let host = env::var("HOST").unwrap_or("127.0.0.1".to_string());
+    let system_code = env::var("SYSTEM_CODE").unwrap_or(APP_NAME.to_string());
+
+    let app_data = web::Data::new(state::AppState {
+        model: Arc::new(Mutex::new(model)),
+        system_code,
+    });
 
     let bind_addr = vec![host, port].join(":");
 
     HttpServer::new(move || {
         App::new()
             .app_data(app_data.clone())
+            .wrap(logging::Logger)
             .service(index)
             .service(predict)
     })

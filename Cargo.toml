@@ -6,8 +6,11 @@ edition = "2021"
 [dependencies]
 actix-web = "4.8.0"
 anyhow = "1"
+futures-util = "0.3.30"
 rust-bert = "0.22.0"
 tokio = "1.39.2"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 
 [dev-dependencies]
 anyhow = "1"
