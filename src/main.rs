@@ -1,6 +1,6 @@
+use std::env;
 use std::sync::Arc;
 use std::sync::Mutex;
-use std::env;
 
 use actix_web::HttpResponse;
 use actix_web::{get, post, web, App, HttpServer, Responder};
@@ -12,9 +12,11 @@ struct AppState {
     model: Arc<Mutex<SentenceEmbeddingsModel>>,
 }
 
+const APP_NAME: &str = "pro-text-vectorizer";
+
 #[get("/")]
 async fn index() -> impl Responder {
-    HttpResponse::Ok().body("Hello from pro-text-vectorizer")
+    HttpResponse::Ok().body("Hello from ".to_string() + &APP_NAME.to_string())
 }
 
 #[post("/predict")]
