@@ -14,7 +14,8 @@ COPY src ./src
 
 RUN cargo build --release
 
-FROM debian:bookworm
+#FROM debian:bookworm
+FROM nvidia/cuda:12.5.1-devel-ubuntu24.04
 
 RUN apt-get update && apt-get install -y \
     ca-certificates \
