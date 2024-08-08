@@ -10,6 +10,7 @@ use rust_bert::pipelines::sentence_embeddings::{
 };
 use serde::{Deserialize, Serialize};
 
+mod auth;
 mod logging;
 mod state;
 
@@ -70,10 +71,12 @@ async fn main() -> std::io::Result<()> {
     let port = env::var("PORT").unwrap_or("8080".to_string());
     let host = env::var("HOST").unwrap_or("127.0.0.1".to_string());
     let system_code = env::var("SYSTEM_CODE").unwrap_or(APP_NAME.to_string());
+    let allowed_api_key = env::var("API_KEY").unwrap_or("".to_string());
 
     let app_data = web::Data::new(state::AppState {
         model: Arc::new(Mutex::new(model)),
         system_code,
+        allowed_api_key,
     });
 
     let bind_addr = vec![host, port].join(":");
@@ -82,6 +85,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(app_data.clone())
             .wrap(logging::Logger)
+            .wrap(auth::Auth)
             .service(index)
             .service(predict)
     })
