@@ -2,16 +2,23 @@ use std::env;
 use std::sync::Arc;
 use std::sync::Mutex;
 
+use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use actix_web::{get, post, web, App, HttpServer, Responder};
 use rust_bert::pipelines::sentence_embeddings::{
     SentenceEmbeddingsBuilder, SentenceEmbeddingsModelType,
 };
+use serde::{Deserialize, Serialize};
 
 mod logging;
 mod state;
 
 const APP_NAME: &str = "pro-text-vectorizer";
+
+#[derive(Serialize, Deserialize)]
+struct EmbeddingsRequest {
+    text: String,
+}
 
 #[get("/")]
 async fn index() -> impl Responder {
@@ -19,9 +26,31 @@ async fn index() -> impl Responder {
 }
 
 #[post("/predict")]
-async fn predict(data: web::Data<state::AppState>, req_body: String) -> impl Responder {
+async fn predict(
+    data: web::Data<state::AppState>,
+    req_body: String,
+    req: HttpRequest,
+) -> impl Responder {
+    let content_type = match req
+        .headers()
+        .get("Content-Type")
+        .and_then(|val| val.to_str().ok())
+    {
+        Some(str) => str.to_string(),
+        None => "text/plain".to_string(),
+    };
+
+    let text: String;
+    if content_type == "application/json" {
+        let data: EmbeddingsRequest =
+            serde_json::from_str(&req_body.to_string()).expect("malformed json");
+        text = data.text.to_string()
+    } else {
+        text = req_body.to_string()
+    }
+
     let model = data.model.lock().unwrap();
-    let embeddings = model.encode(&[req_body]);
+    let embeddings = model.encode(&[text]);
     match embeddings {
         Ok(embeddings) => HttpResponse::Ok().json(embeddings[0].clone()),
         Err(_) => HttpResponse::InternalServerError().body("error generating embeddings"),
