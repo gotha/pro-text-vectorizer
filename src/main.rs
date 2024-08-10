@@ -14,7 +14,7 @@ mod auth;
 mod logging;
 mod state;
 
-const APP_NAME: &str = "pro-text-vectorizer";
+const APP_NAME: &str = "text-vectorizer";
 
 #[derive(Serialize, Deserialize)]
 struct EmbeddingsRequest {

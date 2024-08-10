@@ -1,9 +1,7 @@
-name: "pro-article-vectoriser"
-
 services:
   app:
     build: .
-    image: local/pro-text-vectorizer:latest
+    image: local/text-vectorizer:latest
     ports:
       - 38080:8080
     environment:

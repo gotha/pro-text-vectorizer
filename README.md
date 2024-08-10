@@ -1,4 +1,6 @@
-# Pro Text Vectorizer
+# Text Vectorizer
+
+Text Vectorization API using [all-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2)
 
 ## Requirements
 

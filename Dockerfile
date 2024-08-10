@@ -22,10 +22,10 @@ RUN apt-get update && apt-get install -y \
     libgomp1 \
     curl
 
-COPY --from=builder /usr/src/app/target/release/pro-text-vectorizer /usr/local/bin/pro-text-vectorizer
+COPY --from=builder /usr/src/app/target/release/text-vectorizer /usr/local/bin/text-vectorizer
 COPY --from=builder /opt/libtorch /opt/libtorch
 
 ENV LIBTORCH=/opt/libtorch
 ENV LD_LIBRARY_PATH=${LIBTORCH}/lib
 
-CMD ["/usr/local/bin/pro-text-vectorizer"]
+CMD ["/usr/local/bin/text-vectorizer"]
