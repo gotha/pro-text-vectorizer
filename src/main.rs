@@ -20,6 +20,13 @@ const APP_NAME: &str = "text-vectorizer";
 struct EmbeddingsRequest {
     text: String,
 }
+impl Default for EmbeddingsRequest {
+    fn default() -> EmbeddingsRequest {
+        EmbeddingsRequest {
+            text: "".to_string(),
+        }
+    }
+}
 
 #[get("/")]
 async fn index() -> impl Responder {
@@ -32,35 +39,39 @@ async fn predict(
     req_body: String,
     req: HttpRequest,
 ) -> impl Responder {
-    let content_type = match req
+    let content_type = req
         .headers()
         .get("Content-Type")
         .and_then(|val| val.to_str().ok())
-    {
-        Some(str) => str.to_string(),
-        None => "text/plain".to_string(),
-    };
+        .unwrap_or("text/plain")
+        .to_string();
 
-    let text: String;
-    if content_type == "application/json" {
-        let data: EmbeddingsRequest =
-            serde_json::from_str(&req_body.to_string()).expect("malformed json");
-        text = data.text.to_string()
-    } else {
-        text = req_body.to_string()
+    let text: String = match content_type.as_str() {
+        "application/json" => {
+            let data: EmbeddingsRequest =
+                serde_json::from_str(&req_body.to_string()).unwrap_or(EmbeddingsRequest::default());
+
+            data.text.to_string()
+        }
+        _ => req_body.to_string(),
+    };
+    if text == "" {
+        return HttpResponse::InternalServerError().body("empty or malformed request body");
     }
+
     let res = web::block(move || {
         let model = data.model.lock().unwrap();
         model.encode(&[text])
     })
     .await;
 
-    match res {
-        Ok(embeddings) => match embeddings {
-            Ok(prediction) => HttpResponse::Ok().json(prediction[0].clone()),
-            Err(_) => HttpResponse::InternalServerError().body("error getting prediction"),
-        },
-        Err(_) => HttpResponse::InternalServerError().body("error generating embeddings"),
+    if res.is_err() {
+        return HttpResponse::InternalServerError().body("error generating embeddings");
+    }
+
+    match res.unwrap() {
+        Ok(prediction) => HttpResponse::Ok().json(prediction[0].clone()),
+        Err(_) => HttpResponse::InternalServerError().body("error getting prediction"),
     }
 }
 
