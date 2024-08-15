@@ -49,11 +49,17 @@ async fn predict(
     } else {
         text = req_body.to_string()
     }
+    let res = web::block(move || {
+        let model = data.model.lock().unwrap();
+        model.encode(&[text])
+    })
+    .await;
 
-    let model = data.model.lock().unwrap();
-    let embeddings = model.encode(&[text]);
-    match embeddings {
-        Ok(embeddings) => HttpResponse::Ok().json(embeddings[0].clone()),
+    match res {
+        Ok(embeddings) => match embeddings {
+            Ok(prediction) => HttpResponse::Ok().json(prediction[0].clone()),
+            Err(_) => HttpResponse::InternalServerError().body("error getting prediction"),
+        },
         Err(_) => HttpResponse::InternalServerError().body("error generating embeddings"),
     }
 }
