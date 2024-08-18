@@ -2,6 +2,7 @@
 
 Text Vectorization API using [all-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2)
 
+
 ## Requirements
 
 ### Rust
@@ -35,4 +36,25 @@ cargo build
 
 ```sh
 cargo run
+```
+
+## Usage
+
+```sh
+curl -v \
+    -X POST \
+    -H "Content-Type: application/json" \
+    -d '{"text": "Lorem ipsum"}' \
+    -H "Authorization: Bearer 123" \
+    localhost:5002/predict
+```
+
+or
+
+```sh
+curl -v \
+    -X POST \
+    -d 'Lorem ipsum' \
+    -H "Authorization: Bearer 123" \
+    localhost:5002/predict
 ```
